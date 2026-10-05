@@ -60,6 +60,8 @@ public class FlippingCopilotPlugin extends Plugin {
 	@Inject
 	private GrandExchangeOfferEventHandler offerEventHandler;
 	@Inject
+	private ItemSinkLogger itemSinkLogger;
+	@Inject
 	private AccountStatusManager accountStatusManager;
 	@Inject
 	private SuggestionController suggestionController;
@@ -222,6 +224,7 @@ public class FlippingCopilotPlugin extends Plugin {
 	//---------------------------- Event Handlers ----------------------------//
 	@Subscribe
 	public void onGrandExchangeOfferChanged(GrandExchangeOfferChanged event) {
+		itemSinkLogger.onOfferChanged(event);
 		offerEventHandler.onGrandExchangeOfferChanged(event);
 		clientThread.invokeLater(() -> highlightController.redraw());
 	}
@@ -258,6 +261,7 @@ public class FlippingCopilotPlugin extends Plugin {
 
 		suggestionController.onGameTick();
 		offerEventHandler.onGameTick();
+		itemSinkLogger.onGameTick();
 		osrsLoginRS.set(osrsLoginRS.get().nextState(client));
 	}
 
@@ -299,6 +303,7 @@ public class FlippingCopilotPlugin extends Plugin {
 
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event) {
+		itemSinkLogger.onVarbitChanged(event);
 		gameUiChangesHandler.onVarbitChanged(event);
 	}
 
@@ -312,6 +317,7 @@ public class FlippingCopilotPlugin extends Plugin {
 		switch (event.getGameState())
 		{
 			case LOGIN_SCREEN:
+				itemSinkLogger.onLoginScreen();
 				sessionManager.reset();
 				suggestionManager.reset();
 				osrsLoginManager.reset();

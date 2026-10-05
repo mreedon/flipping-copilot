@@ -31,6 +31,7 @@ public class GrandExchangeOfferEventHandler {
     private final GrandExchangeUncollectedManager grandExchangeUncollectedManager;
     private final OfferManager offerManager;
     private final SuggestionManager suggestionManager;
+    private final ItemSinkLogger itemSinkLogger;
 
     // state
     private final Queue<Transaction> transactionsToProcess = new ConcurrentLinkedQueue<>();
@@ -76,6 +77,7 @@ public class GrandExchangeOfferEventHandler {
 
         Transaction t = inferTransaction(slot, o, prev, consistent);
         if(t != null) {
+            itemSinkLogger.onTransaction(t);
             transactionsToProcess.add(t);
             processTransactions();
             log.debug("inferred transaction {}", t);
