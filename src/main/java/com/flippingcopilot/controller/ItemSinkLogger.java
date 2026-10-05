@@ -137,7 +137,8 @@ public class ItemSinkLogger {
             long[] cur = {client.getVarpValue(SINK_OBJ[i]), longVarp(SINK_PRICE_LONG[i]), longVarp(TAX_LONG[i])};
             long[] prev = last[i];
             last[i] = cur;
-            if (prev == null ? cur[0] <= 0 : Arrays.equals(prev, cur)) {
+            // an empty slot reads -1, and its tax varp also moves on ordinary sales: only a sink item coming or going counts
+            if (prev == null ? cur[0] <= 0 : Arrays.equals(prev, cur) || (prev[0] <= 0 && cur[0] <= 0)) {
                 continue;
             }
             Map<String, Object> ev = event("sink");
