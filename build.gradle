@@ -34,6 +34,7 @@ tasks.withType(JavaCompile) {
 tasks.register('run', JavaExec) {
 	classpath = sourceSets.test.runtimeClasspath
 	mainClass = 'com.flippingcopilot.FlippingCopilotPluginTest'
-	jvmArgs "-ea"
+	// the launcher client's own heap settings: without them max heap defaults to 1/4 of RAM per client
+	jvmArgs "-ea", "-Xmx768m", "-Xss2m", "-XX:CompileThreshold=1500"
 	args "--developer-mode", "--debug"
 }
