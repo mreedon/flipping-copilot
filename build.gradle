@@ -29,3 +29,11 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 	options.release.set(11)
 }
+
+// local dev client (copilot-dev), not for upstream
+tasks.register('run', JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.flippingcopilot.FlippingCopilotPluginTest'
+	jvmArgs "-ea"
+	args "--developer-mode", "--debug"
+}
