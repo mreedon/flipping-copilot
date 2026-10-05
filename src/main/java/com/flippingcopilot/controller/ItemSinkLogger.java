@@ -185,12 +185,25 @@ public class ItemSinkLogger {
         }
     }
 
+    // the login burst arrives before the local player has a name: hold it until the name is known
+    private final List<Map<String, Object>> pending = new ArrayList<>();
+
     private void write(Map<String, Object> ev) {
-        String name = osrsLoginManager.getLastDisplayName();
-        String file = (name == null ? "unknown" : name).replaceAll("[^A-Za-z0-9._-]", "_") + ".jsonl";
+        String name = osrsLoginManager.getPlayerDisplayName();
+        if (name == null) {
+            pending.add(ev);
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Map<String, Object> p : pending) {
+            sb.append(gson.toJson(p)).append('\n');
+        }
+        pending.clear();
+        sb.append(gson.toJson(ev)).append('\n');
+        String file = name.replaceAll("[^A-Za-z0-9._-]", "_") + ".jsonl";
         try {
             DIR.mkdirs();
-            Files.write(new File(DIR, file).toPath(), (gson.toJson(ev) + "\n").getBytes(StandardCharsets.UTF_8),
+            Files.write(new File(DIR, file).toPath(), sb.toString().getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (Exception ex) {
             log.warn("sink log write failed", ex);
