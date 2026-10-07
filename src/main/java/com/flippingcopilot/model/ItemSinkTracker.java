@@ -3,7 +3,7 @@ package com.flippingcopilot.model;
 import javax.inject.Singleton;
 
 /**
- * Tracks sales to the GE tax item sink. The sink buys one item from a sell offer, and the
+ * Tracks sales to the GE tax item sink. The sink buys the item the moment the sell offer is posted, and the
  * client draws the sale from the ge_itemsink_obj/price varps into a slot whose offer stays EMPTY, so it never
  * produces a GrandExchangeOfferChanged event and would otherwise go unrecorded.
  */

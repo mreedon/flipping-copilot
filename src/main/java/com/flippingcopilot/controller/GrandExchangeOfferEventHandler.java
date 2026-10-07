@@ -55,7 +55,7 @@ public class GrandExchangeOfferEventHandler {
     }
 
     /**
-     * The GE tax item sink buys one item from a sell offer. The slot's offer stays EMPTY and the
+     * The GE tax item sink buys one item the moment a sell offer is posted. The slot's offer stays EMPTY and the
      * game shows the sale from the ge_itemsink varps instead, so no GrandExchangeOfferChanged event ever fires
      * for it: watch the varps and book the sale here.
      */
