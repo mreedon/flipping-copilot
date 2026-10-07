@@ -132,9 +132,18 @@ public class ItemSinkLogger {
         if (client.getGameState() != net.runelite.api.GameState.LOGGED_IN) {
             return;
         }
+        // the plugin's own tick work runs after this call: a logger fault must never reach it
+        try {
+            poll();
+        } catch (Exception ex) {
+            log.warn("sink log poll failed", ex);
+        }
+    }
+
+    private void poll() {
         GrandExchangeOffer[] offers = client.getGrandExchangeOffers();
         for (int i = 0; i < SLOTS; i++) {
-            long[] cur = {client.getVarpValue(SINK_OBJ[i]), longVarp(SINK_PRICE_LONG[i]), longVarp(TAX_LONG[i])};
+            long[] cur = {longVarp(SINK_OBJ[i]), longVarp(SINK_PRICE_LONG[i]), longVarp(TAX_LONG[i])};
             long[] prev = last[i];
             last[i] = cur;
             // an empty slot reads -1, and its tax varp also moves on ordinary sales: only a sink item coming or going counts
@@ -148,7 +157,7 @@ public class ItemSinkLogger {
             if (cur[0] > 0) {
                 ev.put("item", client.getItemDefinition((int) cur[0]).getName());
             }
-            ev.put("priceInt", client.getVarpValue(SINK_PRICE[i]));
+            ev.put("priceInt", longVarp(SINK_PRICE[i]));
             ev.put("priceLong", cur[1]);
             ev.put("taxLong", cur[2]);
             ev.put("sold", cur[0] > 0 && cur[2] < Integer.MAX_VALUE);
@@ -157,7 +166,7 @@ public class ItemSinkLogger {
             }
             Map<String, Object> lastOffer = new LinkedHashMap<>();
             for (int k = 0; k < LAST_OFFER.length; k++) {
-                lastOffer.put(LAST_OFFER_KEYS[k], client.getVarpValue(LAST_OFFER[k]));
+                lastOffer.put(LAST_OFFER_KEYS[k], longVarp(LAST_OFFER[k]));
             }
             ev.put("lastOffer", lastOffer);
             if (offers != null && offers[i] != null) {
@@ -177,7 +186,8 @@ public class ItemSinkLogger {
         return ev;
     }
 
-    // RuneLite 1.13.1 types some of these as int varps, and getVarpLongValue then throws
+    // RuneLite types each varp as int or long, and reading it the other way throws (getVarpValue on the long
+    // last_offer_price killed the 2026-10-07 Torva sink summary): read every varp through here
     private long longVarp(int varp) {
         try {
             return client.getVarpLongValue(varp);
